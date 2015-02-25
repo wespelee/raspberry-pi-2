@@ -27,6 +27,7 @@ export LIBXSHMFENCE=libxshmfence
 export PTHREADSTUBS=pthread-stubs
 export XAU=xau
 export XPROTO=xproto
+export XEXTPROTO=xextproto
 
 export INSTALL_PATH=$ROOT_PATH/install
 export LD_LIBRARY_PATH=$INSTALL_PATH/lib
@@ -34,6 +35,7 @@ export PKG_CONFIG_PATH=$INSTALL_PATH/lib/pkgconfig/:$INSTALL_PATH/share/pkgconfi
 export PATH=$ROOT_PATH/$PI_TOOLS/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/:$PATH
 export ACLOCAL_PATH=$INSTALL_PATH/share/aclocal
 export ACLOCAL="aclocal -I $ACLOCAL_PATH"
+export HOST_PREFIX="arm-linux-gnueabihf"
 
 if [ "x$1" == "xras" ]; then
     BUILD_KERNEL=1
@@ -100,76 +102,84 @@ fi
 if [ ! -e $ROOT_PATH/$XPROTO ]; then
     git clone git://anongit.freedesktop.org/xorg/proto/xproto $XPROTO
 fi
+if [ ! -e $ROOT_PATH/$XEXTPROTO ]; then
+    git clone git://anongit.freedesktop.org/xorg/proto/xextproto $XEXTPROTO
+fi
 
 mkdir -p $INSTALL_PATH
 mkdir -p $ACLOCAL_PATH
 
 if [ $BUILD_MESA -eq 1 ]; then
+    cd $PTHREADSTUBS
+    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+    make clean && make && make install
+    cd ..
+
+    cd $XAU
+    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+    make clean && make && make install
+    cd ..
+
     cd $DRM
-    ./autogen.sh --prefix=$INSTALL_PATH
-    make && make install
+    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+    make clean && make && make install
     cd ..
 
     cd $GLPROTO
-    ./autogen.sh --prefix=$INSTALL_PATH
-    make && make install
+    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+    make clean && make && make install
     cd ..
 
     cd $DRI2PROTO 
-    ./autogen.sh --prefix=$INSTALL_PATH
-    make && make install
+    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+    make clean && make && make install
     cd ..
 
     cd $DRI3PROTO 
-    ./autogen.sh --prefix=$INSTALL_PATH
-    make && make install
+    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+    make clean && make && make install
     cd ..
 
     cd $PRESENTPROTO
-    ./autogen.sh --prefix=$INSTALL_PATH
-    make && make install
+    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+    make clean && make && make install
     cd ..
 
     # needed by libxcb:
     cd $XCBPROTO
-    ./autogen.sh --prefix=$INSTALL_PATH
-    make && make install
+    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+    make clean && make && make install
     cd ..
 
     # needed by libxcb:
     cd $MACROS
-    ./autogen.sh --prefix=$INSTALL_PATH
-    make && make install
+    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+    make clean && make && make install
     cd ..
 
     cd $LIBXCB
-    ./autogen.sh --prefix=$INSTALL_PATH
-    make && make install
+    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+    make clean && make && make install
     cd ..
 
     cd $LIBXSHMFENCE
-    ./autogen.sh --prefix=$INSTALL_PATH
-    make && make install
-    cd ..
-
-    cd $PTHREADSTUBS
-    ./autogen.sh --prefix=$INSTALL_PATH
-    make && make install
-    cd ..
-
-    cd $XAU
-    ./autogen.sh --prefix=$INSTALL_PATH
-    make && make install
+    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+    make clean && make && make install
     cd ..
 
     cd $XPROTO
-    ./autogen.sh --prefix=$INSTALL_PATH
-    make && make install
+    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+    make clean && make && make install
+    cd ..
+
+    cd $XEXTPROTO
+    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+    make clean && make && make install
     cd ..
 
     cd $MESA
     ./autogen.sh \
-        --host=arm-linux-gnueabihf \
+        --host=$HOST_PREFIX \
         --prefix=$INSTALL_PATH \
         --with-gallium-drivers=vc4 \
         --enable-gles1 \
