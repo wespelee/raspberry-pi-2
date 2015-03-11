@@ -30,8 +30,9 @@ export XPROTO=xproto
 export XEXTPROTO=xextproto
 
 export INSTALL_PATH=$ROOT_PATH/install
+export NFS_BIN_PATH=$ROOT_PATH/rpi-bin-lib
 export LD_LIBRARY_PATH=$INSTALL_PATH/lib
-export PKG_CONFIG_PATH=$INSTALL_PATH/lib/pkgconfig/:$INSTALL_PATH/share/pkgconfig/
+export PKG_CONFIG_PATH=$INSTALL_PATH/lib/pkgconfig/:$INSTALL_PATH/share/pkgconfig/:$NFS_BIN_PATH/lib/pkgconfig/:$NFS_BIN_PATH/lib/arm-linux-gnueabihf/pkgconfig/:$NFS_BIN_PATH/share/pkgconfig/
 export PATH=$ROOT_PATH/$PI_TOOLS/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/:$PATH
 export ACLOCAL_PATH=$INSTALL_PATH/share/aclocal
 export ACLOCAL="aclocal -I $ACLOCAL_PATH"
@@ -107,6 +108,7 @@ if [ ! -e $ROOT_PATH/$XEXTPROTO ]; then
 fi
 
 mkdir -p $INSTALL_PATH
+mkdir -p $NFS_BIN_PATH
 mkdir -p $ACLOCAL_PATH
 
 if [ $BUILD_MESA -eq 1 ]; then
