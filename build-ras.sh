@@ -30,13 +30,14 @@ export XPROTO=xproto
 export XEXTPROTO=xextproto
 
 export INSTALL_PATH=$ROOT_PATH/install
-export NFS_BIN_PATH=$ROOT_PATH/rpi-bin-lib
-export LD_LIBRARY_PATH=$INSTALL_PATH/lib
-export PKG_CONFIG_PATH=$INSTALL_PATH/lib/pkgconfig/:$INSTALL_PATH/share/pkgconfig/:$NFS_BIN_PATH/lib/pkgconfig/:$NFS_BIN_PATH/lib/arm-linux-gnueabihf/pkgconfig/:$NFS_BIN_PATH/share/pkgconfig/
+export BIN_PATH=$ROOT_PATH/rpi-bin-lib
+export LD_LIBRARY_PATH=$INSTALL_PATH/lib:$BIN_PATH/lib/
+export PKG_CONFIG_PATH=$INSTALL_PATH/lib/pkgconfig/:$INSTALL_PATH/share/pkgconfig/:$BIN_PATH/lib/pkgconfig/
 export PATH=$ROOT_PATH/$PI_TOOLS/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/:$PATH
 export ACLOCAL_PATH=$INSTALL_PATH/share/aclocal
 export ACLOCAL="aclocal -I $ACLOCAL_PATH"
 export HOST_PREFIX="arm-linux-gnueabihf"
+#export C_INCLUDE_PATH=$BIN_PATH/include
 
 if [ "x$1" == "xras" ]; then
     BUILD_KERNEL=1
@@ -108,87 +109,101 @@ if [ ! -e $ROOT_PATH/$XEXTPROTO ]; then
 fi
 
 mkdir -p $INSTALL_PATH
-mkdir -p $NFS_BIN_PATH
 mkdir -p $ACLOCAL_PATH
 
 if [ $BUILD_MESA -eq 1 ]; then
-    cd $PTHREADSTUBS
-    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-    make clean && make && make install
-    cd ..
+    #echo "####### Build $PTHREADSTUBS #######"
+    #cd $PTHREADSTUBS
+    #./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+    #make clean && make && make install
+    #cd ..
 
-    cd $XAU
-    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-    make clean && make && make install
-    cd ..
+    #echo "####### Build $XAU #######"
+    #cd $XAU
+    #./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+    #make clean && make && make install
+    #cd ..
 
-    cd $DRM
-    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-    make clean && make && make install
-    cd ..
-
-    cd $GLPROTO
-    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-    make clean && make && make install
-    cd ..
-
-    cd $DRI2PROTO 
-    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-    make clean && make && make install
-    cd ..
-
-    cd $DRI3PROTO 
-    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-    make clean && make && make install
-    cd ..
-
-    cd $PRESENTPROTO
-    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-    make clean && make && make install
-    cd ..
-
-    # needed by libxcb:
-    cd $XCBPROTO
-    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-    make clean && make && make install
-    cd ..
-
-    # needed by libxcb:
-    cd $MACROS
-    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-    make clean && make && make install
-    cd ..
-
-    cd $LIBXCB
-    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-    make clean && make && make install
-    cd ..
-
-    cd $LIBXSHMFENCE
-    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-    make clean && make && make install
-    cd ..
-
-    cd $XPROTO
-    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-    make clean && make && make install
-    cd ..
-
-    cd $XEXTPROTO
-    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-    make clean && make && make install
-    cd ..
-
+#    echo "####### Build $DRM #######"
+#    cd $DRM
+#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+#    make clean && make && make install
+#    cd ..
+#
+#    echo "####### Build $GLPROTO #######"
+#    cd $GLPROTO
+#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+#    make clean && make && make install
+#    cd ..
+#
+#    echo "####### Build $DRI2PROTO #######"
+#    cd $DRI2PROTO 
+#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+#    make clean && make && make install
+#    cd ..
+#
+#    echo "####### Build $DRI3PROTO #######"
+#    cd $DRI3PROTO 
+#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+#    make clean && make && make install
+#    cd ..
+#
+#    echo "####### Build $PRESENTPROTO #######"
+#    cd $PRESENTPROTO
+#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+#    make clean && make && make install
+#    cd ..
+#
+#    echo "####### Build $XCBPROTO #######"
+#    # needed by libxcb:
+#    cd $XCBPROTO
+#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+#    make clean && make && make install
+#    cd ..
+#
+#    echo "####### Build $MACROS #######"
+#    # needed by libxcb:
+#    cd $MACROS
+#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+#    make clean && make && make install
+#    cd ..
+#
+#    echo "####### Build $LIBXCB #######"
+#    cd $LIBXCB
+#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+#    make clean && make && make install
+#    cd ..
+#
+#    echo "####### Build $LIBXSHMFENCE #######"
+#    cd $LIBXSHMFENCE
+#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+#    make clean && make && make install
+#    cd ..
+#
+#    echo "####### Build $XPROTO #######"
+#    cd $XPROTO
+#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+#    make clean && make && make install
+#    cd ..
+#
+#    echo "####### Build $XEXTPROTO #######"
+#    cd $XEXTPROTO
+#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+#    make clean && make && make install
+#    cd ..
+#
+    echo "####### Build $MESA #######"
     cd $MESA
     ./autogen.sh \
+#    ./configure \
         --host=$HOST_PREFIX \
         --prefix=$INSTALL_PATH \
         --with-gallium-drivers=vc4 \
         --enable-gles1 \
         --enable-gles2 \
         --with-egl-platforms=x11,drm
-#    make
-#    make install
+    make
+    make install
     cd ..
     exit 0
 fi
