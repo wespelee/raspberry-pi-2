@@ -7,3 +7,6 @@
 
 On pi:
 1. rsync -avP /usr/ /work/raspberry/rpi-bin-lib
+
+To build mesa, you need to patch configure file to avoid error like "undefined reference to `__glibc_unlikely`"
+1. Add #include <arm-linux-gnueabihf/sys/cdefs.h> before every #include <pthread.h> in configure.
