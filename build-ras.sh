@@ -111,6 +111,13 @@ fi
 mkdir -p $INSTALL_PATH
 mkdir -p $ACLOCAL_PATH
 
+# Modify binary pkgconfig files to current path
+echo "DEBUG: $PKG_CONFIG_PATH"
+for fn in `ls $BIN_PATH/lib/pkgconfig`
+do
+    sed -i "s@^prefix=.*@prefix=$BIN_PATH@g" $BIN_PATH/lib/pkgconfig/$fn
+done
+
 if [ $BUILD_MESA -eq 1 ]; then
     #echo "####### Build $PTHREADSTUBS #######"
     #cd $PTHREADSTUBS

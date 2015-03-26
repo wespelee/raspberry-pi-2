@@ -1,6 +1,6 @@
-prefix=/usr
+prefix=/home/wespe/test_work/raspberry/raspberry-pi-2/rpi-bin-lib
 exec_prefix=${prefix}
-libdir=${prefix}/lib/
+libdir=${prefix}/lib
 includedir=${prefix}/include
 
 Name: Xext
