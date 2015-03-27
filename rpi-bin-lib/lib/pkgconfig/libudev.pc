@@ -1,0 +1,11 @@
+prefix=/home/wespe/test_work/raspberry/raspberry-pi-2/rpi-bin-lib
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libudev
+Description: Library to access udev device information
+Version: 175
+Libs: -L${libdir} -ludev
+Libs.private: 
+Cflags: -I${includedir}
