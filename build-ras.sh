@@ -37,8 +37,10 @@ export PATH=$ROOT_PATH/$PI_TOOLS/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-rasp
 export ACLOCAL_PATH=$INSTALL_PATH/share/aclocal
 export ACLOCAL="aclocal -I $ACLOCAL_PATH"
 export HOST_PREFIX="arm-linux-gnueabihf"
-#export C_INCLUDE_PATH=$BIN_PATH/include
+export C_INCLUDE_PATH=$BIN_PATH/include
 
+BUILD_KERNEL=0
+BUILD_MESA=0
 if [ "x$1" == "xras" ]; then
     BUILD_KERNEL=1
     KERNEL_PATH=$ROOT_PATH/$RAS_KERNEL
@@ -58,6 +60,9 @@ fi
 # Repo
 if [ ! -e $ROOT_PATH/$VC4_KERNEL ]; then
     git clone https://github.com/anholt/linux.git $VC4_KERNEL
+    cd $VC4_KERNEL
+    git checkout vc4-kms-v3d
+    cd ..
 fi
 if [ ! -e $ROOT_PATH/$PI_TOOLS ]; then
     git clone https://github.com/raspberrypi/tools $PI_TOOLS
@@ -112,7 +117,6 @@ mkdir -p $INSTALL_PATH
 mkdir -p $ACLOCAL_PATH
 
 # Modify binary pkgconfig files to current path
-echo "DEBUG: $PKG_CONFIG_PATH"
 for fn in `ls $BIN_PATH/lib/pkgconfig`
 do
     sed -i "s@^prefix=.*@prefix=$BIN_PATH@g" $BIN_PATH/lib/pkgconfig/$fn
@@ -201,10 +205,7 @@ if [ $BUILD_MESA -eq 1 ]; then
 #
     echo "####### Build $MESA #######"
     cd $MESA
-    ./autogen.sh \
-#    ./configure \
-        --host=$HOST_PREFIX \
-        --prefix=$INSTALL_PATH \
+    ./autogen.sh --host=$HOST_PREFIX --prefix=$INSTALL_PATH \
         --with-gallium-drivers=vc4 \
         --enable-gles1 \
         --enable-gles2 \
@@ -216,7 +217,11 @@ if [ $BUILD_MESA -eq 1 ]; then
 fi
 
 if [ $BUILD_KERNEL -eq 1 ]; then
-    make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- bcmrpi_defconfig -C $KERNEL_PATH
-    make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -C $KERNEL_PATH
+    echo "Build Kernel: $KERNEL_PATH"
+    cd $KERNEL_PATH
+    #make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- bcm2709_defconfig
+    #make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -C $KERNEL_PATH
+    make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
+    $ROOT_PATH/$PI_TOOLS/mkimage/mkknlimg $KERNEL_PATH/arch/arm/boot/zImage kernel-vc4.img
     exit 0
 fi
