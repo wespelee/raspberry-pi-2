@@ -14,4 +14,6 @@ To build mesa, you need to patch configure file to avoid error like "undefined r
 
 Minor:
 1. Add logo.nologo to /boot/cmdline.txt
+2. nfs: Modify you /etc/exports on your fedora pc.
+example: /home/wespe/test_work/raspberry/raspberry-pi-2/install 192.168.6.0/24(rw,no_root_squash) 
 
