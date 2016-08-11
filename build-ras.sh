@@ -59,9 +59,11 @@ fi
 
 # Repo
 if [ ! -e $ROOT_PATH/$VC4_KERNEL ]; then
-    git clone https://github.com/anholt/linux.git $VC4_KERNEL
+    git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git $VC4_KERNEL
     cd $VC4_KERNEL
-    git checkout vc4-kms-v3d
+    git remote add linux-next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+    git fetch linux-next
+    git checkout next-`date +%Y%m%d`
     cd ..
 fi
 if [ ! -e $ROOT_PATH/$PI_TOOLS ]; then
@@ -135,11 +137,11 @@ if [ $BUILD_MESA -eq 1 ]; then
     #make clean && make && make install
     #cd ..
 
-#    echo "####### Build $DRM #######"
-#    cd $DRM
-#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-#    make clean && make && make install
-#    cd ..
+    echo "####### Build $DRM #######"
+    cd $DRM
+    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
+    make clean && make && make install
+    cd ..
 #
 #    echo "####### Build $GLPROTO #######"
 #    cd $GLPROTO
@@ -219,9 +221,10 @@ fi
 if [ $BUILD_KERNEL -eq 1 ]; then
     echo "Build Kernel: $KERNEL_PATH"
     cd $KERNEL_PATH
-    #make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- bcm2709_defconfig
-    #make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -C $KERNEL_PATH
+    make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- multi_v7_defconfig 
     make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
-    $ROOT_PATH/$PI_TOOLS/mkimage/mkknlimg $KERNEL_PATH/arch/arm/boot/zImage kernel-vc4.img
+    #make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- dtbs
+    cp arch/arm/boot/dts/bcm2836-rpi-2-b.dtb $INSTALL_PATH
+    cp arch/arm/boot/zImage $INSTALL_PATH/kernel-vc4.img
     exit 0
 fi
