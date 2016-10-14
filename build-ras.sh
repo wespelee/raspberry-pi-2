@@ -1,3 +1,5 @@
+#!/bin/sh
+
 help () {
     echo "Usage: $0 [Options]"
     echo ""
@@ -11,11 +13,18 @@ help () {
 
 ROOT_PATH=`pwd`
 
-export VC4_KERNEL=vc4-kernel
+export VC4_KERNEL=fix-kernel
+#export VC4_KERNEL=vc4-kernel
 export PI_TOOLS=pi-tools
 export RAS_KERNEL=ras-kernel
 export MESA=mesa
 export DRM=drm
+export XPROTO=xproto
+export RANDRPROTO=randrproto
+export XFONT=libXfont
+export XSERVER=xserver
+export XF86_INPUT_EVDEV=xf86-input-evdev
+
 export GLPROTO=glproto
 export DRI2PROTO=dri2proto
 export DRI3PROTO=dri3proto
@@ -31,13 +40,16 @@ export XEXTPROTO=xextproto
 
 export INSTALL_PATH=$ROOT_PATH/install
 export BIN_PATH=$ROOT_PATH/rpi-bin-lib
-export LD_LIBRARY_PATH=$INSTALL_PATH/lib:$BIN_PATH/lib/
-export PKG_CONFIG_PATH=$INSTALL_PATH/lib/pkgconfig/:$INSTALL_PATH/share/pkgconfig/:$BIN_PATH/lib/pkgconfig/
-export PATH=$ROOT_PATH/$PI_TOOLS/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/:$PATH
-export ACLOCAL_PATH=$INSTALL_PATH/share/aclocal
+# LD_LIBRARY_PATH is for runtime link.
+export LD_LIBRARY_PATH=$INSTALL_PATH/lib:$BIN_PATH/lib:$BIN_PATH/lib/arm-linux-gnueabihf:$BIN_PATH/usr/lib/arm-linux-gnueabihf
+export LIBRARY_PATH=$INSTALL_PATH/lib:$BIN_PATH/lib:$BIN_PATH/lib/arm-linux-gnueabihf:$BIN_PATH/usr/lib/arm-linux-gnueabihf
+export LDFLAGS="-L$BIN_PATH/lib -L$BIN_PATH/lib/arm-linux-gnueabihf -L$BIN_PATH/usr/lib/arm-linux-gnueabihf"
+export PKG_CONFIG_PATH=$INSTALL_PATH/lib/pkgconfig:$INSTALL_PATH/share/pkgconfig:$BIN_PATH/usr/lib/arm-linux-gnueabihf/pkgconfig:$BIN_PATH/usr/share/pkgconfig
+export PATH=$ROOT_PATH/$PI_TOOLS/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin:$PATH
+export ACLOCAL_PATH=$INSTALL_PATH/share/aclocal:$BIN_PATH/usr/share/aclocal
 export ACLOCAL="aclocal -I $ACLOCAL_PATH"
 export HOST_PREFIX="arm-linux-gnueabihf"
-export C_INCLUDE_PATH=$BIN_PATH/include
+export C_INCLUDE_PATH=$BIN_PATH/usr/include:$BIN_PATH/usr/include/arm-linux-gnueabihf
 
 BUILD_KERNEL=0
 BUILD_MESA=0
@@ -78,143 +90,87 @@ fi
 if [ ! -e $ROOT_PATH/$DRM ]; then
     git clone git://anongit.freedesktop.org/git/mesa/drm $DRM
 fi
-if [ ! -e $ROOT_PATH/$GLPROTO ]; then
-    git clone git://anongit.freedesktop.org/xorg/proto/glproto $GLPROTO
-fi
-if [ ! -e $ROOT_PATH/$DRI2PROTO ]; then
-    git clone git://anongit.freedesktop.org/xorg/proto/dri2proto $DRI2PROTO
-fi
-if [ ! -e $ROOT_PATH/$DRI3PROTO ]; then
-    git clone git://anongit.freedesktop.org/xorg/proto/dri3proto $DRI3PROTO
-fi
-if [ ! -e $ROOT_PATH/$PRESENTPROTO ]; then
-    git clone git://anongit.freedesktop.org/xorg/proto/presentproto $PRESENTPROTO
-fi
-if [ ! -e $ROOT_PATH/$XCBPROTO ]; then
-    git clone git://anongit.freedesktop.org/xcb/proto $XCBPROTO
-fi
-if [ ! -e $ROOT_PATH/$MACROS ]; then
-    git clone git://anongit.freedesktop.org/xorg/util/macros $MACROS
-fi
-if [ ! -e $ROOT_PATH/$LIBXCB ]; then
-    git clone git://anongit.freedesktop.org/xcb/libxcb $LIBXCB
-fi
-if [ ! -e $ROOT_PATH/$LIBXSHMFENCE ]; then
-    git clone git://anongit.freedesktop.org/xorg/lib/libxshmfence $LIBXSHMFENCE
-fi
-if [ ! -e $ROOT_PATH/$PTHREADSTUBS ]; then
-    git clone git://anongit.freedesktop.org/xcb/pthread-stubs $PTHREADSTUBS
-fi
-if [ ! -e $ROOT_PATH/$XAU ]; then
-    git clone git://anongit.freedesktop.org/xorg/lib/libXau $XAU
-fi
 if [ ! -e $ROOT_PATH/$XPROTO ]; then
     git clone git://anongit.freedesktop.org/xorg/proto/xproto $XPROTO
 fi
-if [ ! -e $ROOT_PATH/$XEXTPROTO ]; then
-    git clone git://anongit.freedesktop.org/xorg/proto/xextproto $XEXTPROTO
+if [ ! -e $ROOT_PATH/$RANDRPROTO ]; then
+    git clone git://anongit.freedesktop.org/xorg/proto/randrproto $RANDRPROTO
+fi
+if [ ! -e $ROOT_PATH/$XFONT ]; then
+    git clone git://git.freedesktop.org/git/xorg/lib/libXfont $XFONT
+fi
+if [ ! -e $ROOT_PATH/$XSERVER ]; then
+    git clone git://git.freedesktop.org/git/xorg/xserver $XSERVER
+fi
+if [ ! -e $ROOT_PATH/$XF86_INPUT_EVDEV ]; then
+    git clone git://git.freedesktop.org/git/xorg/driver/xf86-input-evdev $XF86_INPUT_EVDEV
 fi
 
 mkdir -p $INSTALL_PATH
 mkdir -p $ACLOCAL_PATH
 
 # Modify binary pkgconfig files to current path
-for fn in `ls $BIN_PATH/lib/pkgconfig`
+for fn in `ls $BIN_PATH/usr/lib/arm-linux-gnueabihf/pkgconfig`
 do
-    sed -i "s@^prefix=.*@prefix=$BIN_PATH@g" $BIN_PATH/lib/pkgconfig/$fn
+    sed -i "s@^prefix=.*@prefix=$BIN_PATH/usr@g" $BIN_PATH/usr/lib/arm-linux-gnueabihf/pkgconfig/$fn
+done
+
+for fn in `ls $BIN_PATH/usr/share/pkgconfig`
+do
+    sed -i "s@^prefix=.*@prefix=$BIN_PATH/usr@g" $BIN_PATH/usr/share/pkgconfig/$fn
 done
 
 if [ $BUILD_MESA -eq 1 ]; then
-    #echo "####### Build $PTHREADSTUBS #######"
-    #cd $PTHREADSTUBS
+
+    #echo "####### Build $DRM #######"
+    #cd $DRM
     #./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
     #make clean && make && make install
     #cd ..
 
-    #echo "####### Build $XAU #######"
-    #cd $XAU
-    #./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-    #make clean && make && make install
+    #echo "####### Build $MESA #######"
+    #cd $MESA
+    #./autogen.sh --host=$HOST_PREFIX --prefix=$INSTALL_PATH \
+    #    --with-gallium-drivers=vc4 \
+    #    --with-dri-drivers= \
+    #    --with-egl-platforms=x11,drm
+    #make
+    #make install
     #cd ..
 
-    echo "####### Build $DRM #######"
-    cd $DRM
-    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-    make clean && make && make install
+    echo "####### Build $XSERVER #######"
+    #cd $XPROTO
+    #./autogen.sh --host=$HOST_PREFIX --prefix=$INSTALL_PATH
+    #make
+    #make install
+    #cd ..
+
+    #cd $RANDRPROTO
+    #./autogen.sh --host=$HOST_PREFIX --prefix=$INSTALL_PATH
+    #make
+    #make install
+    #cd ..
+
+    cd $XFONT
+    #./autogen.sh --host=$HOST_PREFIX --prefix=$INSTALL_PATH
+    #make
+    #make install
     cd ..
-#
-#    echo "####### Build $GLPROTO #######"
-#    cd $GLPROTO
-#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-#    make clean && make && make install
-#    cd ..
-#
-#    echo "####### Build $DRI2PROTO #######"
-#    cd $DRI2PROTO 
-#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-#    make clean && make && make install
-#    cd ..
-#
-#    echo "####### Build $DRI3PROTO #######"
-#    cd $DRI3PROTO 
-#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-#    make clean && make && make install
-#    cd ..
-#
-#    echo "####### Build $PRESENTPROTO #######"
-#    cd $PRESENTPROTO
-#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-#    make clean && make && make install
-#    cd ..
-#
-#    echo "####### Build $XCBPROTO #######"
-#    # needed by libxcb:
-#    cd $XCBPROTO
-#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-#    make clean && make && make install
-#    cd ..
-#
-#    echo "####### Build $MACROS #######"
-#    # needed by libxcb:
-#    cd $MACROS
-#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-#    make clean && make && make install
-#    cd ..
-#
-#    echo "####### Build $LIBXCB #######"
-#    cd $LIBXCB
-#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-#    make clean && make && make install
-#    cd ..
-#
-#    echo "####### Build $LIBXSHMFENCE #######"
-#    cd $LIBXSHMFENCE
-#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-#    make clean && make && make install
-#    cd ..
-#
-#    echo "####### Build $XPROTO #######"
-#    cd $XPROTO
-#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-#    make clean && make && make install
-#    cd ..
-#
-#    echo "####### Build $XEXTPROTO #######"
-#    cd $XEXTPROTO
-#    ./autogen.sh --prefix=$INSTALL_PATH --host=$HOST_PREFIX
-#    make clean && make && make install
-#    cd ..
-#
-    echo "####### Build $MESA #######"
-    cd $MESA
+
+    cd $XSERVER
     ./autogen.sh --host=$HOST_PREFIX --prefix=$INSTALL_PATH \
-        --with-gallium-drivers=vc4 \
-        --enable-gles1 \
-        --enable-gles2 \
-        --with-egl-platforms=x11,drm
+        --with-log-dir=/var/log \
+        --enable-install-setuid
     make
     make install
     cd ..
+
+    #cd $XF86_INPUT_EVDEV
+    #./autogen.sh --host=$HOST_PREFIX --prefix=$INSTALL_PATH
+    #make
+    #make install
+    #cd ..
+
     exit 0
 fi
 
