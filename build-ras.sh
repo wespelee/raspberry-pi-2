@@ -13,8 +13,8 @@ help () {
 
 ROOT_PATH=`pwd`
 
-export VC4_KERNEL=fix-kernel
-#export VC4_KERNEL=vc4-kernel
+#export VC4_KERNEL=fix-kernel
+export VC4_KERNEL=vc4-kernel
 export PI_TOOLS=pi-tools
 export RAS_KERNEL=ras-kernel
 export MESA=mesa
@@ -49,7 +49,6 @@ export PATH=$ROOT_PATH/$PI_TOOLS/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-rasp
 export ACLOCAL_PATH=$INSTALL_PATH/share/aclocal:$BIN_PATH/usr/share/aclocal
 export ACLOCAL="aclocal -I $ACLOCAL_PATH"
 export HOST_PREFIX="arm-linux-gnueabihf"
-export C_INCLUDE_PATH=$BIN_PATH/usr/include:$BIN_PATH/usr/include/arm-linux-gnueabihf
 
 BUILD_KERNEL=0
 BUILD_MESA=0
@@ -63,6 +62,7 @@ elif [ "x$1" == "xupdate" ]; then
     echo $1
 elif [ "x$1" == "xmesa" ]; then
     BUILD_MESA=1
+    export C_INCLUDE_PATH=$BIN_PATH/usr/include:$BIN_PATH/usr/include/arm-linux-gnueabihf
 elif [ "x$1" == "x" ]; then
     help
 elif [ "x$1" == "xhelp" ]; then
@@ -179,8 +179,12 @@ if [ $BUILD_KERNEL -eq 1 ]; then
     cd $KERNEL_PATH
     make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- multi_v7_defconfig 
     make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
-    #make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- dtbs
+    make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- modules
+    make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf modules_install INSTALL_MOD_PATH=$INSTALL_PATH
+    #make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- oldconfig
+    make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- dtbs
     cp arch/arm/boot/dts/bcm2836-rpi-2-b.dtb $INSTALL_PATH
     cp arch/arm/boot/zImage $INSTALL_PATH/kernel-vc4.img
+    tar zcvf $INSTALL_PATH/modules.tgz $INSTALL_PATH/lib/modules
     exit 0
 fi
