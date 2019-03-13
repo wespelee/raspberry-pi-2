@@ -1,0 +1,22 @@
+# This is for installing package to the system directory.
+# Use below with install command:
+# $ env DESTDIR=$HOME/Downloads/raspbian/home/pi/work/install ninja -C build/ install
+#
+
+#meson build/ \
+#    --cross-file=$HOME/Downloads/raspbian/home/pi/cross \
+#    --prefix=/usr \
+#    --libdir=lib/arm-linux-gnueabihf \
+#    "$@"
+
+
+# This is for installing package to a user defined directory.
+# Use below with install command:
+# $ ninja -C build/ install
+#
+
+meson build/ \
+    --cross-file=$HOME/Downloads/raspbian/home/pi/cross \
+    --prefix=/home/ljh/Downloads/raspbian/home/pi/work/install/usr \
+    --libdir=lib/arm-linux-gnueabihf \
+    "$@"

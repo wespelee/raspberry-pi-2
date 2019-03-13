@@ -1,0 +1,16 @@
+[binaries]
+c = '/home/ljh/Downloads/raspbian/home/pi/work/tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc'
+cpp = '/home/ljh/Downloads/raspbian/home/pi/work/tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin/arm-linux-gnueabihf-g++'
+ar = '/home/ljh/Downloads/raspbian/home/pi/work/tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin/arm-linux-gnueabihf-ar'
+strip = '/home/ljh/Downloads/raspbian/home/pi/work/tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin/arm-linux-gnueabihf-strip'
+pkgconfig = '/home/ljh/work/raspberrypi/arm-linux-gnueabihf-pkg-config'
+
+[properties]
+c_args = ['-I/home/ljh/Downloads/raspbian/usr/include -I/home/ljh/Downloads/raspbian/usr/include/arm-linux-gnueabihf']
+c_link_args = ['-Wl,-rpath-link,/home/ljh/Downloads/raspbian/usr/lib/arm-linux-gnueabihf:/home/ljh/Downloads/raspbian/lib/arm-linux-gnueabihf']
+
+[host_machine]
+system = 'linux'
+cpu_family = 'arm'
+cpu = 'armv7hl'
+endian = 'little'
