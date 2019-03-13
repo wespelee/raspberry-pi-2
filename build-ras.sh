@@ -13,8 +13,8 @@ help () {
 
 ROOT_PATH=`pwd`
 
-#export VC4_KERNEL=fix-kernel
-export VC4_KERNEL=vc4-kernel
+export VC4_KERNEL=main-kernel
+#export VC4_KERNEL=vc4-kernel
 export PI_TOOLS=pi-tools
 export RAS_KERNEL=ras-kernel
 export MESA=mesa
@@ -52,6 +52,7 @@ export HOST_PREFIX="arm-linux-gnueabihf"
 
 BUILD_KERNEL=0
 BUILD_MESA=0
+BUILD_PERF=0
 if [ "x$1" == "xras" ]; then
     BUILD_KERNEL=1
     KERNEL_PATH=$ROOT_PATH/$RAS_KERNEL
@@ -63,6 +64,8 @@ elif [ "x$1" == "xupdate" ]; then
 elif [ "x$1" == "xmesa" ]; then
     BUILD_MESA=1
     export C_INCLUDE_PATH=$BIN_PATH/usr/include:$BIN_PATH/usr/include/arm-linux-gnueabihf
+elif [ "x$1" == "xperf" ]; then
+    BUILD_PERF=1
 elif [ "x$1" == "x" ]; then
     help
 elif [ "x$1" == "xhelp" ]; then
@@ -81,44 +84,44 @@ fi
 if [ ! -e $ROOT_PATH/$PI_TOOLS ]; then
     git clone https://github.com/raspberrypi/tools $PI_TOOLS
 fi
-if [ ! -e $ROOT_PATH/$RAS_KERNEL ]; then
-    git clone https://github.com/raspberrypi/linux $RAS_KERNEL
-fi
-if [ ! -e $ROOT_PATH/$MESA ]; then
-    git clone git://anongit.freedesktop.org/mesa/mesa $MESA
-fi
-if [ ! -e $ROOT_PATH/$DRM ]; then
-    git clone git://anongit.freedesktop.org/git/mesa/drm $DRM
-fi
-if [ ! -e $ROOT_PATH/$XPROTO ]; then
-    git clone git://anongit.freedesktop.org/xorg/proto/xproto $XPROTO
-fi
-if [ ! -e $ROOT_PATH/$RANDRPROTO ]; then
-    git clone git://anongit.freedesktop.org/xorg/proto/randrproto $RANDRPROTO
-fi
-if [ ! -e $ROOT_PATH/$XFONT ]; then
-    git clone git://git.freedesktop.org/git/xorg/lib/libXfont $XFONT
-fi
-if [ ! -e $ROOT_PATH/$XSERVER ]; then
-    git clone git://git.freedesktop.org/git/xorg/xserver $XSERVER
-fi
-if [ ! -e $ROOT_PATH/$XF86_INPUT_EVDEV ]; then
-    git clone git://git.freedesktop.org/git/xorg/driver/xf86-input-evdev $XF86_INPUT_EVDEV
-fi
-
+#if [ ! -e $ROOT_PATH/$RAS_KERNEL ]; then
+#    git clone https://github.com/raspberrypi/linux $RAS_KERNEL
+#fi
+#if [ ! -e $ROOT_PATH/$MESA ]; then
+#    git clone git://anongit.freedesktop.org/mesa/mesa $MESA
+#fi
+#if [ ! -e $ROOT_PATH/$DRM ]; then
+#    git clone git://anongit.freedesktop.org/git/mesa/drm $DRM
+#fi
+#if [ ! -e $ROOT_PATH/$XPROTO ]; then
+#    git clone git://anongit.freedesktop.org/xorg/proto/xproto $XPROTO
+#fi
+#if [ ! -e $ROOT_PATH/$RANDRPROTO ]; then
+#    git clone git://anongit.freedesktop.org/xorg/proto/randrproto $RANDRPROTO
+#fi
+#if [ ! -e $ROOT_PATH/$XFONT ]; then
+#    git clone git://git.freedesktop.org/git/xorg/lib/libXfont $XFONT
+#fi
+#if [ ! -e $ROOT_PATH/$XSERVER ]; then
+#    git clone git://git.freedesktop.org/git/xorg/xserver $XSERVER
+#fi
+#if [ ! -e $ROOT_PATH/$XF86_INPUT_EVDEV ]; then
+#    git clone git://git.freedesktop.org/git/xorg/driver/xf86-input-evdev $XF86_INPUT_EVDEV
+#fi
+#
 mkdir -p $INSTALL_PATH
-mkdir -p $ACLOCAL_PATH
-
-# Modify binary pkgconfig files to current path
-for fn in `ls $BIN_PATH/usr/lib/arm-linux-gnueabihf/pkgconfig`
-do
-    sed -i "s@^prefix=.*@prefix=$BIN_PATH/usr@g" $BIN_PATH/usr/lib/arm-linux-gnueabihf/pkgconfig/$fn
-done
-
-for fn in `ls $BIN_PATH/usr/share/pkgconfig`
-do
-    sed -i "s@^prefix=.*@prefix=$BIN_PATH/usr@g" $BIN_PATH/usr/share/pkgconfig/$fn
-done
+#mkdir -p $ACLOCAL_PATH
+#
+## Modify binary pkgconfig files to current path
+#for fn in `ls $BIN_PATH/usr/lib/arm-linux-gnueabihf/pkgconfig`
+#do
+#    sed -i "s@^prefix=.*@prefix=$BIN_PATH/usr@g" $BIN_PATH/usr/lib/arm-linux-gnueabihf/pkgconfig/$fn
+#done
+#
+#for fn in `ls $BIN_PATH/usr/share/pkgconfig`
+#do
+#    sed -i "s@^prefix=.*@prefix=$BIN_PATH/usr@g" $BIN_PATH/usr/share/pkgconfig/$fn
+#done
 
 if [ $BUILD_MESA -eq 1 ]; then
 
@@ -174,17 +177,28 @@ if [ $BUILD_MESA -eq 1 ]; then
     exit 0
 fi
 
+if [ $BUILD_PERF -eq 1 ]; then
+    KERNEL_PATH=$ROOT_PATH/$VC4_KERNEL
+    echo "Build Kernel perf: $KERNEL_PATH"
+    cd $KERNEL_PATH/tools/perf
+    make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
+    exit 0
+fi
+
+JOBS=12
 if [ $BUILD_KERNEL -eq 1 ]; then
+    # For Raspberry Pi 1 and Zero, use bcm2835_defconfig
+    # For Raspberry Pi 2, use multi_v7_defconfig
+
     echo "Build Kernel: $KERNEL_PATH"
     cd $KERNEL_PATH
-    make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- multi_v7_defconfig 
-    make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
-    make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- modules
-    make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf modules_install INSTALL_MOD_PATH=$INSTALL_PATH
-    #make -j8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- oldconfig
-    make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- dtbs
+
+    make -j$JOBS ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- multi_v7_defconfig 
+    make -j$JOBS ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- zImage modules dtbs
+    make -j$JOBS ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- modules_install INSTALL_MOD_PATH=$INSTALL_PATH
+
+    # Copy to the install path
     cp arch/arm/boot/dts/bcm2836-rpi-2-b.dtb $INSTALL_PATH
     cp arch/arm/boot/zImage $INSTALL_PATH/kernel-vc4.img
-    tar zcvf $INSTALL_PATH/modules.tgz $INSTALL_PATH/lib/modules
     exit 0
 fi
